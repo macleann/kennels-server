@@ -38,5 +38,3 @@ def get_single_animal(id):
         # instead of the dot notation that JavaScript used.
         if animal["id"] == id:
             requested_animal = animal
-
-    return requested_animal
