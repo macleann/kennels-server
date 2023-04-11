@@ -27,21 +27,33 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "animals":
             if id is not None:
                 response = get_single_animal(id)
+                if response is None:
+                    self._set_headers(404)
+                    response = "Animal not found"
             else:
                 response = get_all_animals()
         elif resource == "locations":
             if id is not None:
                 response = get_single_location(id)
+                if response is None:
+                    self._set_headers(404)
+                    response = "Location not found"
             else:
                 response = get_all_locations()
         elif resource == "employees":
             if id is not None:
                 response = get_single_employee(id)
+                if response is None:
+                    self._set_headers(404)
+                    response = "Employee not found"
             else:
                 response = get_all_employees()
         elif resource == "customers":
             if id is not None:
                 response = get_single_customer(id)
+                if response is None:
+                    self._set_headers(404)
+                    response = "Customer not found"
             else:
                 response = get_all_customers()
         else:
@@ -66,16 +78,30 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Initialize new resource
         new_resource = None
+        allKeys = post_body.keys()
 
         # Add a new resource to the list.
         if resource == "animals":
-            new_resource = create_animal(post_body)
+            if "name" and "species" and "locationId" and "customerId" and "status" in allKeys:
+                new_resource = create_animal(post_body)
+            else:
+                self._set_headers(400)
         elif resource == "locations":
-            new_resource = create_location(post_body)
+            if "name" and "address" in allKeys:
+                new_resource = create_location(post_body)
+            else:
+                self._set_headers(400)
+                new_resource = f'message: {"address is required" if "name" in allKeys else "name is required"}'
         elif resource == "employees":
-            new_resource = create_employee(post_body)
+            if "name" in allKeys:
+                new_resource = create_employee(post_body)
+            else:
+                new_resource = "message: name is required"
         elif resource == "customers":
-            new_resource = create_customer(post_body)
+            if "name" in allKeys:
+                new_resource = create_customer(post_body)
+            else:
+                new_resource = "message: name is required"
 
         # Encode the new resource and send in response
         self.wfile.write(json.dumps(new_resource).encode())

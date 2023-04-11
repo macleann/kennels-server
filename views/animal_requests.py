@@ -1,10 +1,13 @@
+from .customer_requests import get_single_customer
+from .location_requests import get_single_location
+
 ANIMALS = [
     {
         "id": 1,
         "name": "Snickers",
         "species": "Dog",
         "locationId": 1,
-        "customerId": 4,
+        "customerId": 2,
         "status": "Admitted"
     },
     {
@@ -29,18 +32,32 @@ ANIMALS = [
 def get_all_animals():
     return ANIMALS
 
-# Function with a single parameter
 def get_single_animal(id):
-    # Variable to hold the found animal, if it exists
+    """Returns a single animal from the list
+
+    Args:
+        id (int): The id property of the animal to find
+
+    Returns:
+        dict: A single animal dictionary
+    """
     requested_animal = None
 
-    # Iterate the ANIMALS list above. Very similar to the
-    # for..of loops you used in JavaScript.
     for animal in ANIMALS:
-        # Dictionaries in Python use [] notation to find a key
-        # instead of the dot notation that JavaScript used.
         if animal["id"] == id:
             requested_animal = animal
+
+            # Set new property "customer" on animal
+            # Value will be the dictionary of the customer
+            requested_animal["customer"] = get_single_customer(requested_animal["customerId"])
+
+            # Set new property "location" on animal
+            # Value will be the dictionary of the location
+            requested_animal["location"] = get_single_location(requested_animal["locationId"])
+
+            # Remove the customerId and locationId properties
+            requested_animal.pop("customerId", None)
+            requested_animal.pop("locationId", None)
             return requested_animal
 
 def create_animal(animal):
