@@ -1,6 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import get_all_animals, get_single_animal, create_animal, delete_animal, update_animal, get_all_locations, get_single_location, create_location, delete_location, update_location, get_all_employees, get_single_employee, create_employee, delete_employee, update_employee, get_all_customers, get_single_customer, create_customer, delete_customer, update_customer
+from views import get_all_animals, get_single_animal, create_animal, delete_animal, update_animal, get_all_locations, get_single_location, create_location, delete_location, update_location, get_all_employees, get_single_employee, create_employee, delete_employee, update_employee, get_all_customers, get_single_customer, create_customer, update_customer
 
 
 # Here's a class. It inherits from another class.
@@ -152,20 +152,24 @@ class HandleRequests(BaseHTTPRequestHandler):
         
     def do_DELETE(self):
         # Set a 204 response code
-        self._set_headers(204)
 
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
         # Delete a single animal from the list
         if resource == "animals":
+            self._set_headers(204)
             delete_animal(id)
         elif resource == "locations":
+            self._set_headers(204)
             delete_location(id)
         elif resource == "employees":
+            self._set_headers(204)
             delete_employee(id)
         elif resource == "customers":
-            delete_customer(id)
+            self._set_headers(405)
+            response = "Deleting customer requires contacting the company directly"
+            self.wfile.write(json.dumps(response).encode())
 
         # Encode the new animal and send in response
         self.wfile.write("".encode())
