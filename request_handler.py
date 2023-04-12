@@ -78,27 +78,47 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Initialize new resource
         new_resource = None
-        allKeys = post_body.keys()
+        post_keys = post_body.keys()
+        check_keys = { "animals": ["name", "species", "locationId", "customerId", "status"],
+                   "locations": ["name", "address"],
+                   "employees": "name",
+                   "customers": "name" }
 
         # Add a new resource to the list.
         if resource == "animals":
-            if "name" and "species" and "locationId" and "customerId" and "status" in allKeys:
+            # This first if statement iterates through the keys in check_keys and, if they exist in post_keys, adds them to the enclosing list
+            # Once the iterations are complete, if the new list == check_keys["animals"], we can post the new animal
+            if [key for key in check_keys["animals"] if key in post_body] == check_keys["animals"]:
                 new_resource = create_animal(post_body)
+            # Otherwise, set a 400 header response
+            # Use the same logic to create a new list, but make it all keys NOT in post_body set to a new error_keys variable
+            # Lastly, there's just some conditional logic for syntactically correct grammar
             else:
                 self._set_headers(400)
+                error_keys = [key for key in check_keys["animals"] if key not in post_body]
+                if len(error_keys) > 2:
+                    new_resource = f"message: {', '.join(error_keys)} are required"
+                elif len(error_keys) > 1:
+                    new_resource = f"message: {' and '.join(error_keys)} are required"
+                else:
+                    new_resource = f"message: {error_keys[0]} is required"
         elif resource == "locations":
-            if "name" and "address" in allKeys:
+            if [key for key in check_keys["locations"] if key in post_body] == check_keys["locations"]:
                 new_resource = create_location(post_body)
             else:
                 self._set_headers(400)
-                new_resource = f'message: {"address is required" if "name" in allKeys else "name is required"}'
+                error_keys = [key for key in check_keys["locations"] if key not in post_body]
+                if len(error_keys) > 1:
+                    new_resource = f"message: {' and '.join(error_keys)} are required"
+                else:
+                    new_resource = f"message: {error_keys[0]} is required"
         elif resource == "employees":
-            if "name" in allKeys:
+            if "name" in post_keys:
                 new_resource = create_employee(post_body)
             else:
                 new_resource = "message: name is required"
         elif resource == "customers":
-            if "name" in allKeys:
+            if "name" in post_keys:
                 new_resource = create_customer(post_body)
             else:
                 new_resource = "message: name is required"
