@@ -1,9 +1,7 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import get_all_animals, get_single_animal, create_animal, delete_animal, update_animal, get_all_locations, get_single_location, create_location, delete_location, update_location, get_all_employees, get_single_employee, create_employee, delete_employee, update_employee, get_all_customers, get_single_customer, create_customer, delete_customer, update_customer
-
-method_mapper = {"animals": {"all": get_all_animals, "single": get_single_animal}, "locations": {"all": get_all_locations, "single": get_single_location},
-                 "employees": {"all": get_all_employees, "single": get_single_employee}, "customers": {"all": get_all_customers, "single": get_single_customer}}
+from repository import all, retrieve, create, update, delete
 
 # Here's a class. It inherits from another class.
 # For now, think of a class as a container for functions that
@@ -31,7 +29,7 @@ class HandleRequests(BaseHTTPRequestHandler):
     def get_all_or_single(self, resource, id):
         """Gets all or one of any resource for the do_get function"""
         if id is not None:
-            response = method_mapper[resource]["single"](id)
+            response = retrieve(resource, id)
 
             if response is not None:
                 self._set_headers(200)
@@ -40,7 +38,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = ''
         else:
             self._set_headers(200)
-            response = method_mapper[resource]["all"]()
+            response = all(resource)
 
         return response
 
@@ -57,18 +55,8 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
-        # Initialize new resource
-        new_resource = None
-
         # Add a new resource to the list.
-        if resource == "animals":
-            new_resource = create_animal(post_body)
-        elif resource == "locations":
-            new_resource = create_location(post_body)
-        elif resource == "employees":
-            new_resource = create_employee(post_body)
-        elif resource == "customers":
-            new_resource = create_customer(post_body)
+        new_resource = create(resource, post_body)
 
         # Encode the new resource and send in response
         self.wfile.write(json.dumps(new_resource).encode())
@@ -85,14 +73,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
 
         # Delete a single animal from the list
-        if resource == "animals":
-            update_animal(id, post_body)
-        elif resource == "locations":
-            update_location(id, post_body)
-        elif resource == "employees":
-            update_employee(id, post_body)
-        elif resource == "customers":
-            update_customer(id, post_body)
+        update(resource, id, post_body)
 
         # Encode the new animal and send in response
         self.wfile.write("".encode())
@@ -105,14 +86,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
 
         # Delete a single animal from the list
-        if resource == "animals":
-            delete_animal(id)
-        elif resource == "locations":
-            delete_location(id)
-        elif resource == "employees":
-            delete_employee(id)
-        elif resource == "customers":
-            delete_customer(id)
+        delete(resource, id)
 
         # Encode the new animal and send in response
         self.wfile.write("".encode())
