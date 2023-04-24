@@ -28,7 +28,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # If the path does not include a query parameter, continue with the original if block
         if '?' not in self.path:
-            ( resource, id ) = parsed
+            (resource, id, query_params) = parsed
 
             if resource == "animals":
                 if id is not None:
@@ -52,18 +52,21 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_all_employees()
 
         else: # There is a ? in the path, run the query param functions
-            (resource, query) = parsed
+            (resource, id, query_params) = parsed
+            print(query_params)
 
             # see if the query dictionary has an email key
-            if query.get('email') and resource == 'customers':
-                response = get_customers_by_email(query['email'][0])
-            elif query.get('location_id'):
+            if query_params.get('email') and resource == 'customers':
+                response = get_customers_by_email(query_params['email'][0])
+            elif query_params.get('location_id'):
                 if resource == 'animals':
-                    response = get_animals_by_location(query['location_id'][0])
+                    response = get_animals_by_location(query_params['location_id'][0])
                 elif resource == 'employees':
-                    response = get_employees_by_location(query['location_id'][0])
-            elif query.get('status') and resource == 'animals':
-                response = get_animals_by_status(query['status'][0])
+                    response = get_employees_by_location(query_params['location_id'][0])
+            elif query_params.get('status') and resource == 'animals':
+                response = get_animals_by_status(query_params['status'][0])
+            elif query_params.get('sortBy') and resource == 'animals':
+                response = get_all_animals(query_params)
 
         self.wfile.write(json.dumps(response).encode())
 
@@ -111,7 +114,12 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         if resource == "animals":
             success = update_animal(id, post_body)
-        # rest of the elif's
+        elif resource == "locations":
+            success = update_location(id, post_body)
+        elif resource == "employees":
+            success = update_employee(id, post_body)
+        elif resource == "customers":
+            success = update_customer(id, post_body)
 
         if success:
             self._set_headers(204)
@@ -168,20 +176,24 @@ class HandleRequests(BaseHTTPRequestHandler):
     # replace the parse_url function in the class
     def parse_url(self, path):
         """Parse the url into the resource and id"""
-        parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
-        resource = path_params[1]
+        url_components = urlparse(path)
+        path_params = url_components.path.strip("/").split("/")
+        query_params = []
 
-        if parsed_url.query:
-            query = parse_qs(parsed_url.query)
-            return (resource, query)
+        if url_components.query != '':
+            query_params = url_components.query.split("&")
 
-        pk = None
+        resource = path_params[0]
+        id = None
+
         try:
-            pk = int(path_params[2])
-        except (IndexError, ValueError):
-            pass
-        return (resource, pk)
+            id = int(path_params[1])
+        except IndexError:
+            pass  # No route parameter exists: /animals
+        except ValueError:
+            pass  # Request had trailing slash: /animals/
+
+        return (resource, id, query_params)
 
 # This function is not inside the class. It is the starting
 # point of this application.

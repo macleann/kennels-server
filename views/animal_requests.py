@@ -2,16 +2,24 @@ import sqlite3
 import json
 from models import Animal, Location, Customer
 
-def get_all_animals():
+def get_all_animals(query_params):
     # Open a connection to the database
-    with sqlite3.connect("./kennel.sqlite3") as conn:
-
-        # Just use these. It's a Black Box.
+    with sqlite3.connect("./kennel.db") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
+        sort_by = ""
+
+        if len(query_params) != 0:
+            param = query_params[0]
+            [qs_key, qs_value] = param.split("=")
+
+            if qs_key == "_sortBy":
+                if qs_value == 'location':
+                    sort_by = " ORDER BY location_id"
+
         # Write the SQL query to get the information you want
-        db_cursor.execute("""
+        db_cursor.execute(f"""
         SELECT
             a.id,
             a.name,
@@ -29,6 +37,7 @@ def get_all_animals():
             ON l.id = a.location_id
         JOIN Customer c
             ON c.id = a.customer_id
+        {sort_by}
         """)
 
         # Initialize an empty list to hold all animal representations
