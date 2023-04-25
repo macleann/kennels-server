@@ -34,7 +34,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 if id is not None:
                     response = get_single_animal(id)
                 else:
-                    response = get_all_animals()
+                    response = get_all_animals('')
             elif resource == "customers":
                 if id is not None:
                     response = get_single_customer(id)
@@ -54,19 +54,21 @@ class HandleRequests(BaseHTTPRequestHandler):
         else: # There is a ? in the path, run the query param functions
             (resource, id, query_params) = parsed
             print(query_params)
+            (key_param, value_param) = query_params[0].split('=')
+            print(query_params, key_param, value_param)
 
             # see if the query dictionary has an email key
-            if query_params.get('email') and resource == 'customers':
-                response = get_customers_by_email(query_params['email'][0])
-            elif query_params.get('location_id'):
-                if resource == 'animals':
-                    response = get_animals_by_location(query_params['location_id'][0])
-                elif resource == 'employees':
-                    response = get_employees_by_location(query_params['location_id'][0])
-            elif query_params.get('status') and resource == 'animals':
-                response = get_animals_by_status(query_params['status'][0])
-            elif query_params.get('sortBy') and resource == 'animals':
+            if key_param.startswith('_sort') and resource == 'animals':
                 response = get_all_animals(query_params)
+            elif key_param.startswith('email') and resource == 'customers':
+                response = get_customers_by_email(value_param)
+            elif key_param.startswith('location_id'):
+                if resource == 'animals':
+                    response = get_animals_by_location(value_param)
+                elif resource == 'employees':
+                    response = get_employees_by_location(value_param)
+            elif key_param.startswith('status') and resource == 'animals':
+                response = get_animals_by_status(value_param)
 
         self.wfile.write(json.dumps(response).encode())
 

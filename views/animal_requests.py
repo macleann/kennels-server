@@ -4,7 +4,7 @@ from models import Animal, Location, Customer
 
 def get_all_animals(query_params):
     # Open a connection to the database
-    with sqlite3.connect("./kennel.db") as conn:
+    with sqlite3.connect("./kennel.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
@@ -17,9 +17,12 @@ def get_all_animals(query_params):
             if qs_key == "_sortBy":
                 if qs_value == 'location':
                     sort_by = " ORDER BY location_id"
+                if qs_value == 'customer':
+                    sort_by = " ORDER BY customer_id"
+                if qs_value == 'status':
+                    sort_by = " ORDER BY status"
 
-        # Write the SQL query to get the information you want
-        db_cursor.execute(f"""
+        sql_to_execute = f"""
         SELECT
             a.id,
             a.name,
@@ -38,7 +41,10 @@ def get_all_animals(query_params):
         JOIN Customer c
             ON c.id = a.customer_id
         {sort_by}
-        """)
+        """
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute(sql_to_execute)
 
         # Initialize an empty list to hold all animal representations
         animals = []

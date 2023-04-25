@@ -11,8 +11,10 @@ def get_all_locations():
         SELECT
             l.id,
             l.name,
-            l.address
+            l.address,
+            (SELECT COUNT(a.id) FROM Animal a WHERE a.location_id = l.id) animals
         FROM location l
+        GROUP BY l.id
         """)
 
         locations = []
@@ -20,7 +22,7 @@ def get_all_locations():
         dataset = db_cursor.fetchall()
 
         for row in dataset:
-            location = Location(row['id'], row['name'], row['address'])
+            location = Location(row['id'], row['name'], row['address'], row['animals'])
             locations.append(location.__dict__)
 
     return locations
