@@ -1,6 +1,6 @@
 import sqlite3
 import json
-from models import Location
+from models import Location, LocationAnimal
 
 def get_all_locations():
     with sqlite3.connect("./kennel.sqlite3") as conn:
@@ -22,7 +22,10 @@ def get_all_locations():
         dataset = db_cursor.fetchall()
 
         for row in dataset:
-            location = Location(row['id'], row['name'], row['address'], row['animals'])
+            location = Location(row['id'], row['name'], row['address'])
+            location_animals = LocationAnimal(row['animals'])
+            total_animals = location_animals.__dict__
+            location.animals = total_animals['animals']
             locations.append(location.__dict__)
 
     return locations

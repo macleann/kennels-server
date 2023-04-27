@@ -53,9 +53,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         else: # There is a ? in the path, run the query param functions
             (resource, id, query_params) = parsed
-            print(query_params)
             (key_param, value_param) = query_params[0].split('=')
-            print(query_params, key_param, value_param)
 
             # see if the query dictionary has an email key
             if key_param.startswith('_sort') and resource == 'animals':

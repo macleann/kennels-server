@@ -1,6 +1,6 @@
 import sqlite3
 import json
-from models import Employee, Location
+from models import Employee, Location, Animal
 
 def get_all_employees():
     with sqlite3.connect("./kennel.sqlite3") as conn:
@@ -46,15 +46,33 @@ def get_single_employee(id):
             e.id,
             e.name,
             e.address,
-            e.location_id
-        FROM employee e
+            e.location_id,
+            ea.employee_id,
+            ea.animal_id,
+            a.id animal_id,
+            a.name animal_name,
+            a.status,
+            a.breed,
+            a.customer_id
+        FROM Employee e
+        JOIN EmployeeAnimal ea ON ea.employee_id = e.id
+        JOIN Animal a ON a.id = ea.animal_id
         WHERE e.id = ?
         """, ( id, ))
 
-        data = db_cursor.fetchone()
+        dataset = db_cursor.fetchall()
+        animals = []
+        employee = None
 
-        employee = Employee(data['id'], data['name'],
-                            data['address'], data['location_id'])
+        for row in dataset:
+            if employee is None:
+                employee = Employee(row['id'], row['name'],
+                            row['address'], row['location_id'])
+            else:
+                animal = Animal(row['animal_id'], row['animal_name'], row['status'],
+                                row['breed'], row['customer_id'], row['location_id'])
+                animals.append(animal.__dict__)
+        employee.animals = animals
 
         return employee.__dict__
 

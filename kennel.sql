@@ -33,6 +33,14 @@ CREATE TABLE `Employee` (
 
 );
 
+CREATE TABLE `EmployeeAnimal` (
+	`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`employee_id` INTEGER NOT NULL,
+	`animal_id` INTEGER NOT NULL,
+	FOREIGN KEY(`employee_id`) REFERENCES `Employee`(`id`),
+	FOREIGN KEY(`animal_id`) REFERENCES `Animal`(`id`)
+);
+
 INSERT INTO `Location` VALUES (null, 'Nashville North', "64 Washington Heights");
 INSERT INTO `Location` VALUES (null, 'Nashville South', "101 Penn Ave");
 
@@ -60,17 +68,19 @@ INSERT INTO `Animal` VALUES (null, "Cleo", "Kennel", "Poodle", 2, 2);
 INSERT INTO `Animal` VALUES (null, "Popcorn", "Kennel", "Beagle", 3, 2);
 INSERT INTO `Animal` VALUES (null, "Curly", "Treatment", "Poodle", 4, 2);
 
-SELECT
-    a.id,
-    a.name,
-    a.breed,
-    a.status,
-    a.location_id,
-    a.customer_id,
-    l.name location_name,
-    l.address location_address
-FROM Animal a
-JOIN Location l
-    ON l.id = a.location_id
-
-SELECT * FROM Animal ORDER BY id DESC;
+INSERT INTO `EmployeeAnimal` VALUES (null, 1, 1);
+INSERT INTO `EmployeeAnimal` VALUES (null, 2, 2);
+INSERT INTO `EmployeeAnimal` VALUES (null, 3, 3);
+INSERT INTO `EmployeeAnimal` VALUES (null, 4, 4);
+INSERT INTO `EmployeeAnimal` VALUES (null, 5, 5);
+INSERT INTO `EmployeeAnimal` VALUES (null, 1, 6);
+INSERT INTO `EmployeeAnimal` VALUES (null, 2, 7);
+INSERT INTO `EmployeeAnimal` VALUES (null, 3, 8);
+INSERT INTO `EmployeeAnimal` VALUES (null, 4, 1);
+INSERT INTO `EmployeeAnimal` VALUES (null, 5, 2);
+INSERT INTO `EmployeeAnimal` VALUES (null, 1, 3);
+INSERT INTO `EmployeeAnimal` VALUES (null, 2, 4);
+INSERT INTO `EmployeeAnimal` VALUES (null, 3, 5);
+INSERT INTO `EmployeeAnimal` VALUES (null, 4, 6);
+INSERT INTO `EmployeeAnimal` VALUES (null, 5, 7);
+INSERT INTO `EmployeeAnimal` VALUES (null, 1, 8);

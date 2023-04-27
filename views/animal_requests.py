@@ -21,6 +21,8 @@ def get_all_animals(query_params):
                     sort_by = " ORDER BY customer_id"
                 if qs_value == 'status':
                     sort_by = " ORDER BY status"
+                if qs_value == 'name':
+                    sort_by = " ORDER BY a.name"
 
         sql_to_execute = f"""
         SELECT
